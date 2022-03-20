@@ -105,11 +105,17 @@ app.run(async (app) => {
           coin.price = +coin.bnbReserve / +coin.tokenReserve;
         }
       }
+      for(let f=ctrl.coins.length-1; f>=0; f--) {
+        if(!ctrl.coins[f].timeData['600']) {
+          ctrl.coins.splice(ctrl.coins.indexOf(ctrl.coins[f]), 1);
+        }
+      }
       doSort();
       redrawCoinTable();
     }
     const ctrl = {
       coins: [],
+      buyers: [],
       sort: 'time60',
       sortDir: 1,
       setSort: (name) => {
