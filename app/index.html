@@ -1,0 +1,39 @@
+<html>
+<head>
+</head>
+<body>
+  <page></page>
+  <script type="text/template" name="default">
+    <header>
+      <img src="https://images.launchbox-app.com/be4b6071-7eb2-4bc1-bb29-e25ca4ba767f.jpg" />
+    </header>
+    <table class="coin-table">
+      <thead>{{app.$t('coin-header', this)}}</thead>
+      <tbody>{{coins.map(c => app.$t('coin', c)).join('')}}</tbody>
+    </table>
+    
+  </script>
+  <script type="text/template" name="coin-header">
+    <tr>
+      <th onclick="app.context.controller.setSort('symbol')" class="s">Symbol{{sort==='symbol'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('name')">Name{{sort==='name'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('reserve0')" class="c">Reserve0{{sort==='reserve0'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('reserve1')" class="c">Reserve1{{sort==='reserve1'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('time60')" class="c s">60s{{sort==='time60'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('time300')" class="c s">5min{{sort==='time300'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('time600')" class="c s">10min{{sort==='time600'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+    </tr>
+  </script>
+  <script type="text/template" name="coin">
+    <tr>
+      <td><a href="https://dexscreener.com/bsc/{{this.pairAddress}}" target="_blank">{{this.symbol}}</a></td>
+      <td>{{this.name}}</td>
+      <td class="c">{{app.Num(this.bnbReserve || 0)}} BNB</td>
+      <td class="c">{{app.Num(this.tokenReserve || 0)}} {{this.symbol}}</td>
+      <td class="c">{{this.timeData['60']}}</td>
+      <td class="c">{{this.timeData['300']}}</td>
+      <td class="c">{{this.timeData['600']}}</td>
+    </tr>
+  </script>
+<script src="main.61c40e73b2013979df2c.js"></script></body>
+</html>

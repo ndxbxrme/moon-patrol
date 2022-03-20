@@ -1,0 +1,31 @@
+{
+  "name": "moon-patrol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --host 0.0.0.0",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "deploy": "rm -rf app && npm run build && aws s3 rm s3://www.rainstormweb.com/pslive && aws s3 sync app s3://www.rainstormweb.com/pslive"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@metamask/onboarding": "^1.0.1",
+    "ethers": "^5.5.4",
+    "turbomini": "0.0.4"
+  },
+  "devDependencies": {
+    "css-loader": "^5.2.6",
+    "csv-loader": "^3.0.3",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.3.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^4.2.2"
+  }
+}
