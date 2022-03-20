@@ -8,9 +8,10 @@
       <img src="https://images.launchbox-app.com/be4b6071-7eb2-4bc1-bb29-e25ca4ba767f.jpg" />
     </header>
     <table class="coin-table">
-      <thead>{{app.$t('coin-header', this)}}</thead>
-      <tbody>{{coins.map(c => app.$t('coin', c)).join('')}}</tbody>
+      <thead>{{this.coins && app.$t('coin-header', this) || ''}}</thead>
+      <tbody>{{(this.coins || []).map(c => app.$t('coin', c)).join('')}}</tbody>
     </table>
+    {{nometamask ? '<h2 class="nometamask">MoonPatrol requires <a href="https://metamask.io/">Metamask</a>, come back when you are fully equipped.</h2>': ''}}
     
   </script>
   <script type="text/template" name="coin-header">

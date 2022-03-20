@@ -50,7 +50,7 @@ app.run(async (app) => {
       return;
     }
     console.log('default controller');
-    if(!isMetaMaskInstalled()) return;
+    if(!isMetaMaskInstalled()) return {nometamask:true};
     const pancakeFactory = new ethers.Contract(pancakeFactoryAddress, pancakeFactoryAbi, provider);
     const doSort = () => {
       switch(ctrl.sort) {

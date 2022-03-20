@@ -45,3 +45,7 @@ header img {
   flex: 1;
   width: 100%;
 }
+h2.nometamask {
+  margin: 2em;
+  text-align: center;
+}
