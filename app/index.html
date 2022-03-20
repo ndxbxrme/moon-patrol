@@ -19,6 +19,7 @@
       <th onclick="app.context.controller.setSort('name')">Name{{sort==='name'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
       <th onclick="app.context.controller.setSort('reserve0')" class="c">Reserve0{{sort==='reserve0'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
       <th onclick="app.context.controller.setSort('reserve1')" class="c">Reserve1{{sort==='reserve1'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+      <th onclick="app.context.controller.setSort('price')" class="c">Price{{sort==='price'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
       <th onclick="app.context.controller.setSort('time60')" class="c s">60s{{sort==='time60'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
       <th onclick="app.context.controller.setSort('time300')" class="c s">5min{{sort==='time300'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
       <th onclick="app.context.controller.setSort('time600')" class="c s">10min{{sort==='time600'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
@@ -30,10 +31,11 @@
       <td>{{this.name}}</td>
       <td class="c">{{app.Num(this.bnbReserve || 0)}} BNB</td>
       <td class="c">{{app.Num(this.tokenReserve || 0)}} {{this.symbol}}</td>
+      <td class="c">{{app.Num(this.price || 0)}} BNB</td>
       <td class="c">{{this.timeData['60']}}</td>
       <td class="c">{{this.timeData['300']}}</td>
       <td class="c">{{this.timeData['600']}}</td>
     </tr>
   </script>
-<script src="main.78802dff6d002be7a0b8.js"></script></body>
+<script src="main.ea624de23f25f984e954.js"></script></body>
 </html>

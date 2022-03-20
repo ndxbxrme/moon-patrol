@@ -3,7 +3,7 @@ const CHAIN_ID = '0x316';
 const TurboMini = require('turbomini');
 const ethers = require('ethers');
 const MetaMaskOnboarding = require('@metamask/onboarding').default;
-const forwarderOrigin = 'http://localhost:8080';
+const forwarderOrigin = window.location.href;
 const pancakeRouterAddress = '0x10ed43c718714eb63d5aa57b78b54704e256024e';
 const pancakeRouterAbi = require('./abi/pancake_router.json');
 const pancakeFactoryAddress = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73';
@@ -30,7 +30,7 @@ app.run(async (app) => {
     ethereum.on('connect', (connectInfo) => {
       if(!app.state.connected) {
         app.state.connected = true;
-        app.refresh();
+        //app.refresh();
       }
       app.state.wrongChain = connectInfo.chainId!==CHAIN_ID;
     });
@@ -40,7 +40,15 @@ app.run(async (app) => {
   else {
     //no metamask
   }
-  app.controller('default', (params) => {
+  app.controller('default', async (params) => {
+    try {
+      //await ethereum.request({method: 'eth_requestAccounts'});
+      app.state.connected = true;
+      //app.refresh();
+    } catch (e) {
+      throw(e);
+      return;
+    }
     console.log('default controller');
     if(!isMetaMaskInstalled()) return;
     const pancakeFactory = new ethers.Contract(pancakeFactoryAddress, pancakeFactoryAbi, provider);
@@ -60,6 +68,8 @@ app.run(async (app) => {
           ctrl.coins.sort((a,b) => +a.bnbReserve > +b.bnbReserve ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
         case 'reserve1':
           ctrl.coins.sort((a,b) => +a.tokenReserve > +b.tokenReserve ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
+        case 'price':
+          ctrl.coins.sort((a,b) => +a.price > +b.price ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
       }
     };
     const redrawCoinTable = () => {
@@ -92,6 +102,7 @@ app.run(async (app) => {
             coin.bnbReserve = ethers.utils.formatEther(reserves[1]);
             coin.tokenReserve = ethers.utils.formatUnits(reserves[0], coin.decimals);
           }
+          coin.price = +coin.bnbReserve / +coin.tokenReserve;
         }
       }
       doSort();
