@@ -11,7 +11,7 @@
       <thead>{{this.coins && app.$t('coin-header', this) || ''}}</thead>
       <tbody>{{(this.coins || []).map(c => app.$t('coin', c)).join('')}}</tbody>
     </table>
-    {{nometamask ? '<h2 class="nometamask">MoonPatrol requires <a href="https://metamask.io/">Metamask</a>, come back when you are fully equipped.</h2>': ''}}
+    {{this.nometamask ? '<h2 class="nometamask">MoonPatrol requires <a href="https://metamask.io/">Metamask</a>, come back when you are fully equipped.</h2>': ''}}
     
   </script>
   <script type="text/template" name="coin-header">
