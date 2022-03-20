@@ -6,8 +6,8 @@
   "scripts": {
     "start": "webpack-dev-server --host 0.0.0.0",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "deploy": "rm -rf app && npm run build && aws s3 rm s3://www.rainstormweb.com/pslive && aws s3 sync app s3://www.rainstormweb.com/pslive"
+    "build": "rm -rf app && rm -rf docs && webpack && cp -r app docs",
+    "deploy": "npm run build && aws s3 rm s3://www.rainstormweb.com/pslive && aws s3 sync app s3://www.rainstormweb.com/pslive"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
     "ethers": "^5.5.4",
-    "turbomini": "0.0.4"
+    "turbomini": "0.0.5"
   },
   "devDependencies": {
     "css-loader": "^5.2.6",

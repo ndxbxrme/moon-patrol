@@ -10,7 +10,7 @@ const pancakeFactoryAddress = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73';
 const pancakeFactoryAbi = require('./abi/uniswap_factory.json');
 const bep20Abi = require('./abi/bep20.json');
 const lpAbi = require('./abi/lp.json');
-window.app = TurboMini();
+window.app = TurboMini('/moon-patrol');
 app.run(async (app) => {
   app.Num = (t) => 
     isNaN(t) ? 0 : new Intl.NumberFormat("en-GB",{
