@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped&family=JetBrains+Mono:wght@100;400&display=swap');
 body {
   background: black;
-  font-family: monospace;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7em;
   color: #afaf2a;
   margin: 0;
 }
@@ -15,6 +17,7 @@ template {
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 1em;
 }
 th, td {
   text-align: left;

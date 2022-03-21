@@ -12,13 +12,7 @@ app.run(async (app) => {
     if(!window.ethereum) return {nometamask:true};
     transfers.redrawTableBody = (ctrl) => app.$('table.coin-table tbody').innerHTML = ctrl.coins.map(c => app.$t('coin', c)).join('');
     transfers.redrawTableHead = (ctrl) => app.$('table.coin-table thead').innerHTML = app.$t('coin-header', ctrl);
-    return {
-      setSort: transfers.setSort,
-      unload: () => {
-        transfers.redrawTableBody = null;
-        transfers.redrawTableHead = null;
-      }
-    };
+    return transfers;
   });
   app.controller('another', async (params) => {
     if(!window.ethereum) return {nometamask:true};
