@@ -5,6 +5,7 @@ const Num = require('./components/num.js');
 const forwarderOrigin = window.location.href;
 window.app = TurboMini('/moon-patrol');
 app.run(async (app) => {
+  app.useHash = true;
   const transfers = Transfers(app, forwarderOrigin);
   Num(app);
   app.controller('default', async (params) => {
