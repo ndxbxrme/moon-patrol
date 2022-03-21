@@ -10,7 +10,7 @@
     <header>
       <img src="https://images.launchbox-app.com/be4b6071-7eb2-4bc1-bb29-e25ca4ba767f.jpg" />
     </header>
-    <a href="" onclick="app.goto('another')">Another page</a>
+    <a href="" onclick="app.goto('moon-patrol/another')">Another page</a>
     <table class="coin-table">
       <thead>{{this.coins && app.$t('coin-header', this) || ''}}</thead>
       <tbody>{{(this.coins || []).map(c => app.$t('coin', c)).join('')}}</tbody>
@@ -41,7 +41,7 @@
       <td class="c">{{this.time600}}</td>
     </tr>
   </script>
-  <script type="text/template" name="another">
+  <script type="text/template" name="moon-patrol/another">
     <h1>another page</h1>
   </script>
 <script src="main.835f2670df682ddf474f.js"></script></body>
