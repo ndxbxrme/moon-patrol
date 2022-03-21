@@ -10,12 +10,12 @@
     <header>
       <img src="https://images.launchbox-app.com/be4b6071-7eb2-4bc1-bb29-e25ca4ba767f.jpg" />
     </header>
+    <a href="" onclick="app.goto('another')">Another page</a>
     <table class="coin-table">
       <thead>{{this.coins && app.$t('coin-header', this) || ''}}</thead>
       <tbody>{{(this.coins || []).map(c => app.$t('coin', c)).join('')}}</tbody>
     </table>
     {{this.nometamask ? '<h2 class="nometamask">MoonPatrol requires <a href="https://metamask.io/">Metamask</a>, come back when you are fully equipped.</h2>': ''}}
-    
   </script>
   <script type="text/template" name="coin-header">
     <tr>
@@ -36,10 +36,13 @@
       <td class="c">{{app.Num(this.bnbReserve || 0)}} BNB</td>
       <td class="c">{{app.Num(this.tokenReserve || 0)}} {{this.symbol}}</td>
       <td class="c">{{app.Num(this.price || 0)}} BNB</td>
-      <td class="c">{{this.timeData['60']}}</td>
-      <td class="c">{{this.timeData['300']}}</td>
-      <td class="c">{{this.timeData['600']}}</td>
+      <td class="c">{{this.time60}}</td>
+      <td class="c">{{this.time300}}</td>
+      <td class="c">{{this.time600}}</td>
     </tr>
+  </script>
+  <script type="text/template" name="another">
+    <h1>another page</h1>
   </script>
 </body>
 </html>

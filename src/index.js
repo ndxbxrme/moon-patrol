@@ -1,215 +1,26 @@
 import './index.css';
-const CHAIN_ID = '0x316';
 const TurboMini = require('turbomini');
-const ethers = require('ethers');
-const MetaMaskOnboarding = require('@metamask/onboarding').default;
+const Transfers = require('./components/transfers.js');
+const Num = require('./components/num.js');
 const forwarderOrigin = window.location.href;
-const dexRouterAddress = '0x10ed43c718714eb63d5aa57b78b54704e256024e';
-const dexRouterAbi = require('./abi/pancake_router.json');
-const dexFactoryAddress = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73';
-const dexFactoryAbi = require('./abi/uniswap_factory.json');
-const bep20Abi = require('./abi/bep20.json');
-const lpAbi = require('./abi/lp.json');
-const chains = {
-  '0x38': {
-    name: 'BSC',
-    token: 'BNB',
-    dexFactoryAddress: '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73',
-    dexRouterAddress: '0x10ed43c718714eb63d5aa57b78b54704e256024e',
-    scanner: 'https://bscscan.com/token/'
-  },
-  '0xa86a': {
-    name: 'Avalanche',
-    token: 'AVAX',
-    dexFactoryAddress: '0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10',
-    dexRouterAddress: '0x60aE616a2155Ee3d9A68541Ba4544862310933d4',
-    scanner: 'https://snowtrace.io/address/'
-  },
-  '0xfa': {
-    name: 'Fantom',
-    token: 'FTM',
-    dexFactoryAddress: '0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3',
-    dexRouterAddress: '0xF491e7B69E4244ad4002BC14e878a34207E38c29',
-    scanner: 'https://ftmscan.com/address/'
-  },
-  '0x89': {
-    name: 'Polygon',
-    token: 'MATIC',
-    dexFactoryAddress: '0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3',
-    dexRouterAddress: '0xF491e7B69E4244ad4002BC14e878a34207E38c29',
-    scanner: 'https://ftmscan.com/address/'
-  },
-}
 window.app = TurboMini('/moon-patrol');
 app.run(async (app) => {
-  app.Num = (t) => 
-    isNaN(t) ? 0 : new Intl.NumberFormat("en-GB",{
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 1,
-      maximumSignificantDigits: 4
-    }).format(t);
-  let provider = null;
-  let signer = null;
-  const onboarding = new MetaMaskOnboarding({forwarderOrigin});
-  const isMetaMaskInstalled = () => {
-    const {ethereum} = window;
-    return Boolean(ethereum && ethereum.isMetaMask);
-  }
-  console.log('chain', ethereum.chainId)
-  if(isMetaMaskInstalled()) {
-    ethereum.on('chainChanged', (_chainId) => window.location.reload());
-    ethereum.on('connect', (connectInfo) => {
-      if(!app.state.connected) {
-        app.state.connected = true;
-      }
-      console.log('connected');
-      app.state.wrongChain = connectInfo.chainId!==CHAIN_ID;
-      app.refresh();
-    });
-    provider = new ethers.providers.Web3Provider(ethereum);
-    signer = provider.getSigner();
-  }
-  else {
-    //no metamask
-  }
+  const transfers = Transfers(app, forwarderOrigin);
+  Num(app);
   app.controller('default', async (params) => {
-    try {
-      //await ethereum.request({method: 'eth_requestAccounts'});
-      app.state.connected = true;
-      //app.refresh();
-    } catch (e) {
-      throw(e);
-      return;
-    }
-    console.log('default controller');
-    if(!isMetaMaskInstalled()) return {nometamask:true};
-    const dexFactory = new ethers.Contract(dexFactoryAddress, dexFactoryAbi, provider);
-    const doSort = () => {
-      switch(ctrl.sort) {
-        case 'symbol':
-          ctrl.coins.sort((a,b) => a.symbol > b.symbol ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'name':
-          ctrl.coins.sort((a,b) => a.name > b.name ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'time60':
-          ctrl.coins.sort((a,b) => a.timeData['60'] > b.timeData['60'] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'time300':
-          ctrl.coins.sort((a,b) => a.timeData['300'] > b.timeData['300'] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'time600':
-          ctrl.coins.sort((a,b) => a.timeData['600'] > b.timeData['600'] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'reserve0':
-          ctrl.coins.sort((a,b) => +a.bnbReserve > +b.bnbReserve ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'reserve1':
-          ctrl.coins.sort((a,b) => +a.tokenReserve > +b.tokenReserve ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
-        case 'price':
-          ctrl.coins.sort((a,b) => +a.price > +b.price ? -1 * ctrl.sortDir : 1 * ctrl.sortDir); break;
+    if(!window.ethereum) return {nometamask:true};
+    transfers.redrawTableBody = (ctrl) => app.$('table.coin-table tbody').innerHTML = ctrl.coins.map(c => app.$t('coin', c)).join('');
+    transfers.redrawTableHead = (ctrl) => app.$('table.coin-table thead').innerHTML = app.$t('coin-header', ctrl);
+    return {
+      setSort: transfers.setSort,
+      unload: () => {
+        transfers.redrawTableBody = null;
+        transfers.redrawTableHead = null;
       }
     };
-    const redrawCoinTable = () => {
-      app.$('table.coin-table tbody').innerHTML = ctrl.coins.map(c => app.$t('coin', c)).join('');
-    }
-    const updateCoinData = async () => {
-      const now = new Date().getTime();
-      for(let f=0; f<ctrl.coins.length; f++) {
-        const coin = ctrl.coins[f];
-        if(!coin.pairAddress) {
-          coin.pairAddress = await dexFactory.getPair(coin.token0, coin.address);
-        }
-        coin.timeData = coin.buyHistory.reduce((res, hist) => {
-          Object.keys(res).forEach(key => {
-            if(hist.x > now - (+key * 1000)) {
-              res[key]+=hist.v;
-            }
-          })
-          return res;
-        }, {'60':0,'300':0,'600':0});
-        if(coin.timeData['60'] || coin.resCooldown++ > 200) {
-          coin.resCooldown = 0;
-          const pairContract = new ethers.Contract(coin.pairAddress, lpAbi, provider);
-          const reserves = await pairContract.getReserves();
-          if(ethers.BigNumber.from(coin.address).gt(ethers.BigNumber.from(coin.token0))) {
-            coin.bnbReserve = ethers.utils.formatEther(reserves[0]);
-            coin.tokenReserve = ethers.utils.formatUnits(reserves[1], coin.decimals);
-          }
-          else {
-            coin.bnbReserve = ethers.utils.formatEther(reserves[1]);
-            coin.tokenReserve = ethers.utils.formatUnits(reserves[0], coin.decimals);
-          }
-          coin.price = +coin.bnbReserve / +coin.tokenReserve;
-        }
-      }
-      for(let f=ctrl.coins.length-1; f>=0; f--) {
-        if(!ctrl.coins[f].timeData['600']) {
-          ctrl.coins.splice(ctrl.coins.indexOf(ctrl.coins[f]), 1);
-        }
-      }
-      doSort();
-      redrawCoinTable();
-    }
-    const ctrl = {
-      coins: [],
-      buyers: [],
-      sort: 'time60',
-      sortDir: 1,
-      setSort: (name) => {
-        console.log('setting sort', name);
-        if(name!==ctrl.sort) ctrl.sortDir = 1;
-        else ctrl.sortDir *= -1;
-        ctrl.sort = name;
-        doSort();
-        redrawCoinTable();
-        app.$('table.coin-table thead').innerHTML = app.$t('coin-header', ctrl);
-      },
-      connect: async () => {
-        const filter = {
-          topics: [
-            ethers.utils.id('Transfer(address,address,uint256)'),
-            ethers.utils.hexZeroPad(dexRouterAddress, 32)
-          ]
-        }
-        provider.on(filter, async (log, event) => {
-          //console.log('got events');
-          try {
-            const transaction = await provider.getTransaction(log.transactionHash);
-            const iface = new ethers.utils.Interface(dexRouterAbi);
-            const res = iface.decodeFunctionData('swapExactETHForTokens', transaction.data);
-            const contract = new ethers.Contract(res.path[1], bep20Abi, provider);
-            const name = await contract.name();
-            const symbol = await contract.symbol();
-            const decimals = await contract.decimals();
-            let coin = ctrl.coins.find(c => c.address===res.path[1]);
-            const now = new Date().getTime();
-            if(coin) {
-              coin.volume++;
-            }
-            else {
-              coin = {
-                address: res.path[1],
-                token0: res.path[0],
-                name, symbol, decimals,
-                volume: 1,
-                buyHistory: [{x: now, v: 1}],
-                resCooldown: 0
-              };
-              ctrl.coins.push(coin);
-            }
-            if(coin.buyHistory[0].x < now + 100) {
-              coin.buyHistory[0].v++;
-            }
-            else {
-              coin.buyHistory.unshift({
-                x: now,
-                v: 1
-              })
-            }
-            //app.refresh();
-          } catch(e) {
-            //console.log('error', e)
-          }
-        })
-        setInterval(updateCoinData, 1000)
-      }
-    }
-    ctrl.connect();
-    return ctrl;
-  })
+  });
+  app.controller('another', async (params) => {
+    if(!window.ethereum) return {nometamask:true};
+    return {};
+  });
 }).start()
