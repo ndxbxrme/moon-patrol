@@ -4,12 +4,42 @@ const TurboMini = require('turbomini');
 const ethers = require('ethers');
 const MetaMaskOnboarding = require('@metamask/onboarding').default;
 const forwarderOrigin = window.location.href;
-const pancakeRouterAddress = '0x10ed43c718714eb63d5aa57b78b54704e256024e';
-const pancakeRouterAbi = require('./abi/pancake_router.json');
-const pancakeFactoryAddress = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73';
-const pancakeFactoryAbi = require('./abi/uniswap_factory.json');
+const dexRouterAddress = '0x10ed43c718714eb63d5aa57b78b54704e256024e';
+const dexRouterAbi = require('./abi/pancake_router.json');
+const dexFactoryAddress = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73';
+const dexFactoryAbi = require('./abi/uniswap_factory.json');
 const bep20Abi = require('./abi/bep20.json');
 const lpAbi = require('./abi/lp.json');
+const chains = {
+  '0x38': {
+    name: 'BSC',
+    token: 'BNB',
+    dexFactoryAddress: '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73',
+    dexRouterAddress: '0x10ed43c718714eb63d5aa57b78b54704e256024e',
+    scanner: 'https://bscscan.com/token/'
+  },
+  '0xa86a': {
+    name: 'Avalanche',
+    token: 'AVAX',
+    dexFactoryAddress: '0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10',
+    dexRouterAddress: '0x60aE616a2155Ee3d9A68541Ba4544862310933d4',
+    scanner: 'https://snowtrace.io/address/'
+  },
+  '0xfa': {
+    name: 'Fantom',
+    token: 'FTM',
+    dexFactoryAddress: '0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3',
+    dexRouterAddress: '0xF491e7B69E4244ad4002BC14e878a34207E38c29',
+    scanner: 'https://ftmscan.com/address/'
+  },
+  '0x89': {
+    name: 'Polygon',
+    token: 'MATIC',
+    dexFactoryAddress: '0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3',
+    dexRouterAddress: '0xF491e7B69E4244ad4002BC14e878a34207E38c29',
+    scanner: 'https://ftmscan.com/address/'
+  },
+}
 window.app = TurboMini('/moon-patrol');
 app.run(async (app) => {
   app.Num = (t) => 
@@ -25,14 +55,16 @@ app.run(async (app) => {
     const {ethereum} = window;
     return Boolean(ethereum && ethereum.isMetaMask);
   }
+  console.log('chain', ethereum.chainId)
   if(isMetaMaskInstalled()) {
     ethereum.on('chainChanged', (_chainId) => window.location.reload());
     ethereum.on('connect', (connectInfo) => {
       if(!app.state.connected) {
         app.state.connected = true;
-        //app.refresh();
       }
+      console.log('connected');
       app.state.wrongChain = connectInfo.chainId!==CHAIN_ID;
+      app.refresh();
     });
     provider = new ethers.providers.Web3Provider(ethereum);
     signer = provider.getSigner();
@@ -51,7 +83,7 @@ app.run(async (app) => {
     }
     console.log('default controller');
     if(!isMetaMaskInstalled()) return {nometamask:true};
-    const pancakeFactory = new ethers.Contract(pancakeFactoryAddress, pancakeFactoryAbi, provider);
+    const dexFactory = new ethers.Contract(dexFactoryAddress, dexFactoryAbi, provider);
     const doSort = () => {
       switch(ctrl.sort) {
         case 'symbol':
@@ -80,7 +112,7 @@ app.run(async (app) => {
       for(let f=0; f<ctrl.coins.length; f++) {
         const coin = ctrl.coins[f];
         if(!coin.pairAddress) {
-          coin.pairAddress = await pancakeFactory.getPair(coin.token0, coin.address);
+          coin.pairAddress = await dexFactory.getPair(coin.token0, coin.address);
         }
         coin.timeData = coin.buyHistory.reduce((res, hist) => {
           Object.keys(res).forEach(key => {
@@ -131,14 +163,14 @@ app.run(async (app) => {
         const filter = {
           topics: [
             ethers.utils.id('Transfer(address,address,uint256)'),
-            ethers.utils.hexZeroPad('0x10ed43c718714eb63d5aa57b78b54704e256024e', 32)
+            ethers.utils.hexZeroPad(dexRouterAddress, 32)
           ]
         }
         provider.on(filter, async (log, event) => {
           //console.log('got events');
           try {
             const transaction = await provider.getTransaction(log.transactionHash);
-            const iface = new ethers.utils.Interface(pancakeRouterAbi);
+            const iface = new ethers.utils.Interface(dexRouterAbi);
             const res = iface.decodeFunctionData('swapExactETHForTokens', transaction.data);
             const contract = new ethers.Contract(res.path[1], bep20Abi, provider);
             const name = await contract.name();

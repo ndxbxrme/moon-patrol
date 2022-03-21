@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --host 0.0.0.0",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf app && rm -rf docs && webpack && cp -r app docs",
+    "build": "rm -rf app && rm -rf docs && webpack && cp -r app docs && cp -r src/icons docs",
     "deploy": "npm run build && aws s3 rm s3://www.rainstormweb.com/pslive && aws s3 sync app s3://www.rainstormweb.com/pslive"
   },
   "keywords": [],
