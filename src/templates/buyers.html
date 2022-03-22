@@ -1,5 +1,5 @@
 {{app.$t('page-top')}}
 <table class="buyer-table">
   <thead>{{this.buyers && app.$t('buyer-header', this) || ''}}</thead>
-  <tbody>{{(this.buyers || []).map(c => app.$t('buyer', c)).join('')}}</tbody>
+  <tbody>{{(this.buyers || []).filter((b,i) => i < 10).map(c => app.$t('buyer', c)).join('')}}</tbody>
 </table>

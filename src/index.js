@@ -18,7 +18,7 @@ app.run((app) => {
   });
   app.controller('buyers', async (params) => {
     if(!window.ethereum) return {nometamask:true};
-    transfers.redrawTableBody = (ctrl) => app.$('table.buyer-table tbody').innerHTML = ctrl.buyers.map(c => app.$t('buyer', c)).join('');
+    transfers.redrawTableBody = (ctrl) => app.$('table.buyer-table tbody').innerHTML = ctrl.buyers.filter((b,i) => i < 100).map(c => app.$t('buyer', c)).join('');
     transfers.redrawTableHead = (ctrl) => app.$('table.buyer-table thead').innerHTML = app.$t('buyer-header', ctrl);
     transfers.setSort('nocoins');
     return transfers;

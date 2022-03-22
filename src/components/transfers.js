@@ -90,6 +90,8 @@ module.exports = (app, forwarderOrigin) => {
       const symbol = await contract.symbol();
       const decimals = await contract.decimals();
       const value = +ethers.utils.formatEther(transaction.value);
+      const code = await provider.getCode(res.path[1]);
+      //console.log(code);
       let coin = ctrl.coins.find(c => c.address===res.path[1]);
       let buyer = ctrl.buyers.find(b => b.address===res.to);
       const now = new Date().getTime();
@@ -131,7 +133,7 @@ module.exports = (app, forwarderOrigin) => {
           buyer.nocoins++;
           buyercoin = {
             address: res.to,
-            symbol, decimals, value, volume: 1
+            symbol, decimals, value, pairAddress:coin.pairAddress, volume: 1
           }
           buyer.coins.push(buyercoin);
         }
@@ -174,7 +176,7 @@ module.exports = (app, forwarderOrigin) => {
       const filter = {
         topics: [
           ethers.utils.id('Transfer(address,address,uint256)'),
-          ethers.utils.hexZeroPad(dexRouterAddress, 32)
+          [ethers.utils.hexZeroPad(dexRouterAddress, 32), ethers.utils.hexZeroPad('0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8', 32)]
         ]
       }
       provider.on(filter, handleEvent);
