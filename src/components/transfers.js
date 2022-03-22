@@ -152,7 +152,7 @@ module.exports = (app, forwarderOrigin) => {
         let buyercoin = buyer.coins.find(c => c.pairAddress===pairAddress);
         if(buyercoin) {
           buyercoin.bvolume++;
-          buyercoin[log.side + 'value'] += value;
+          buyercoin[log.side + 'Value'] += value;
         }
         else {
           buyer.nocoins++;
