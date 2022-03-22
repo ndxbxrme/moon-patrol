@@ -1,0 +1,10 @@
+<tr>
+  <td><a href="https://dexscreener.com/bsc/{{this.pairAddress}}" target="_blank">{{this.symbol}}</a></td>
+  <td>{{this.name}}</td>
+  <td class="c">{{app.Num(this.bnbReserve || 0)}} BNB</td>
+  <td class="c">{{app.Num(this.tokenReserve || 0)}} {{this.symbol}}</td>
+  <td class="c">{{app.Num(this.price || 0)}} BNB</td>
+  <td class="c">{{this.time60 || 0}}</td>
+  <td class="c">{{this.time300 || 0}}</td>
+  <td class="c">{{this.time600 || 0}}</td>
+</tr>

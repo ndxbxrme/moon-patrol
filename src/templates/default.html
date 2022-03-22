@@ -1,0 +1,6 @@
+{{app.$t('page-top')}}
+<table class="coin-table">
+  <thead>{{this.coins && app.$t('coin-header', this) || ''}}</thead>
+  <tbody>{{(this.coins || []).map(c => app.$t('coin', c)).join('')}}</tbody>
+</table>
+{{this.nometamask ? '<h2 class="nometamask">MoonPatrol requires <a href="https://metamask.io/">Metamask</a>, come back when you are fully equipped.</h2>': ''}}

@@ -4,7 +4,8 @@ const Transfers = require('./components/transfers.js');
 const Num = require('./components/num.js');
 const forwarderOrigin = window.location.href;
 window.app = TurboMini('/moon-patrol');
-app.run(async (app) => {
+app.run((app) => {
+  ['buyer', 'buyer-header', 'buyers', 'coin', 'coin-header', 'default', 'page-top'].forEach(name => app.template(name, require('./templates/' + name + '.html')));
   app.useHash = true;
   const transfers = Transfers(app, forwarderOrigin);
   Num(app);
@@ -12,10 +13,14 @@ app.run(async (app) => {
     if(!window.ethereum) return {nometamask:true};
     transfers.redrawTableBody = (ctrl) => app.$('table.coin-table tbody').innerHTML = ctrl.coins.map(c => app.$t('coin', c)).join('');
     transfers.redrawTableHead = (ctrl) => app.$('table.coin-table thead').innerHTML = app.$t('coin-header', ctrl);
+    transfers.setSort('time60');
     return transfers;
   });
-  app.controller('another', async (params) => {
+  app.controller('buyers', async (params) => {
     if(!window.ethereum) return {nometamask:true};
-    return {};
+    transfers.redrawTableBody = (ctrl) => app.$('table.buyer-table tbody').innerHTML = ctrl.buyers.map(c => app.$t('buyer', c)).join('');
+    transfers.redrawTableHead = (ctrl) => app.$('table.buyer-table thead').innerHTML = app.$t('buyer-header', ctrl);
+    transfers.setSort('nocoins');
+    return transfers;
   });
 }).start()

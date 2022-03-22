@@ -1,0 +1,8 @@
+<tr>
+  <td><a href="https://bscscan.com/address/{{this.address}}" target="_blank">{{this.address}}</a></td>
+  <td>{{this.coins.map(c => '<a href="https://dexscreener.com/bsc/' + c.pairAddress + '" target="_blank">' + c.symbol + '<sup>(' + app.Num(c.value) + ' BNB)</sup></a>').join(', ')}}</td>
+  <td class="c">{{this.nocoins}}</td>
+  <td class="c">{{this.volume}}</td>
+  <td class="c nw">{{app.Num(this.value || 0)}} BNB</td>
+  <td class="c nw">{{app.Num(this.balance || 0)}} BNB</td>
+</tr>

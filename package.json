@@ -15,7 +15,8 @@
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
     "ethers": "^5.5.4",
-    "turbomini": "0.0.5"
+    "html-loader": "^0.5.5",
+    "turbomini": "0.0.6"
   },
   "devDependencies": {
     "css-loader": "^5.2.6",

@@ -21,6 +21,10 @@ module.exports = (app, forwarderOrigin, connect) => {
       console.log('connected');
       //app.refresh();
     });
+    if(ethereum.chainId) {
+      app.state.connected = true;
+      connect();
+    }
     ctrl.provider = new ethers.providers.Web3Provider(ethereum);
     ctrl.signer = ctrl.provider.getSigner();
   }

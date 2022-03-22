@@ -40,14 +40,14 @@ module.exports = (app, forwarderOrigin) => {
   const connect = () => ctrl.connect();
   const {provider, signer} = Wallet(app, forwarderOrigin, connect);
   const dexFactory = new ethers.Contract(dexFactoryAddress, dexFactoryAbi, provider);
-  const doSort = () => ctrl.coins.sort((a,b) => a[ctrl.sort] > b[ctrl.sort] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir);
+  const doSort = () => {
+    ctrl.coins.sort((a,b) => a[ctrl.sort] > b[ctrl.sort] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir);
+    ctrl.buyers.sort((a,b) => a[ctrl.sort] > b[ctrl.sort] ? -1 * ctrl.sortDir : 1 * ctrl.sortDir)
+  }
   const updateCoinData = async () => {
     const now = new Date().getTime();
     for(let f=0; f<ctrl.coins.length; f++) {
       const coin = ctrl.coins[f];
-      if(!coin.pairAddress) {
-        coin.pairAddress = await dexFactory.getPair(coin.token0, coin.address);
-      }
       const times = [60,300,600];
       times.forEach(time => coin['time' + time] = 0);
       coin.timeData = coin.buyHistory.forEach(hist => {
@@ -80,6 +80,81 @@ module.exports = (app, forwarderOrigin) => {
     doSort();
     ctrl.redrawTableBody && ctrl.redrawTableBody(ctrl);
   }
+  const handleEvent = async (log, event) => {
+    try {
+      const transaction = await provider.getTransaction(log.transactionHash);
+      const iface = new ethers.utils.Interface(dexRouterAbi);
+      const res = iface.decodeFunctionData('swapExactETHForTokens', transaction.data);
+      const contract = new ethers.Contract(res.path[1], bep20Abi, provider);
+      const name = await contract.name();
+      const symbol = await contract.symbol();
+      const decimals = await contract.decimals();
+      const value = +ethers.utils.formatEther(transaction.value);
+      let coin = ctrl.coins.find(c => c.address===res.path[1]);
+      let buyer = ctrl.buyers.find(b => b.address===res.to);
+      const now = new Date().getTime();
+      if(coin) {
+        coin.volume++;
+      }
+      else {
+        coin = {
+          address: res.path[1],
+          token0: res.path[0],
+          name, symbol, decimals,
+          volume: 1,
+          buyHistory: [{x: now, v: 1}],
+          resCooldown: 0
+        };
+        ctrl.coins.push(coin);
+      }
+      if(coin.buyHistory[0].x < now + 100) {
+        coin.buyHistory[0].v++;
+      }
+      else {
+        coin.buyHistory.unshift({
+          x: now,
+          v: 1
+        })
+      }
+      if(!coin.pairAddress) {
+        coin.pairAddress = await dexFactory.getPair(coin.token0, coin.address);
+      }
+      if(buyer) {
+        buyer.volume++;
+        buyer.value += value;
+        let buyercoin = buyer.coins.find(c => c.address===res.path[1]);
+        if(buyercoin) {
+          buyercoin.bvolume++;
+          buyercoin.value+=value;
+        }
+        else {
+          buyer.nocoins++;
+          buyercoin = {
+            address: res.to,
+            symbol, decimals, value, volume: 1
+          }
+          buyer.coins.push(buyercoin);
+        }
+      }
+      else {
+        const balance = +ethers.utils.formatEther(await provider.getBalance(res.to));
+        buyer = {
+          address: res.to,
+          volume: 1,
+          value: value,
+          nocoins: 1,
+          balance, coins: [ {
+            address: res.path[1],
+            name, symbol, decimals, value, pairAddress:coin.pairAddress, volume: 1
+          }]
+        }
+        ctrl.buyers.unshift(buyer);
+      }
+    } catch(e) {
+      //console.log('error', e)
+    }
+    
+  }
   const ctrl = {
     redrawTableBody: null,
     redrawTableHead: null,
@@ -102,46 +177,8 @@ module.exports = (app, forwarderOrigin) => {
           ethers.utils.hexZeroPad(dexRouterAddress, 32)
         ]
       }
-      provider.on(filter, async (log, event) => {
-        try {
-          const transaction = await provider.getTransaction(log.transactionHash);
-          const iface = new ethers.utils.Interface(dexRouterAbi);
-          const res = iface.decodeFunctionData('swapExactETHForTokens', transaction.data);
-          const contract = new ethers.Contract(res.path[1], bep20Abi, provider);
-          const name = await contract.name();
-          const symbol = await contract.symbol();
-          const decimals = await contract.decimals();
-          let coin = ctrl.coins.find(c => c.address===res.path[1]);
-          const now = new Date().getTime();
-          if(coin) {
-            coin.volume++;
-          }
-          else {
-            coin = {
-              address: res.path[1],
-              token0: res.path[0],
-              name, symbol, decimals,
-              volume: 1,
-              buyHistory: [{x: now, v: 1}],
-              resCooldown: 0
-            };
-            ctrl.coins.push(coin);
-          }
-          if(coin.buyHistory[0].x < now + 100) {
-            coin.buyHistory[0].v++;
-          }
-          else {
-            coin.buyHistory.unshift({
-              x: now,
-              v: 1
-            })
-          }
-          //app.refresh();
-        } catch(e) {
-          //console.log('error', e)
-        }
-      })
-      setInterval(updateCoinData, 1000)
+      provider.on(filter, handleEvent);
+      setInterval(updateCoinData, 1000);
     }
   }
   return ctrl;

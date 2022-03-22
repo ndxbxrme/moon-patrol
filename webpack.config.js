@@ -30,6 +30,12 @@ module.exports = {
               ]
           },
           {
+              test: /\.html/,
+              use: [
+                  "html-loader"
+              ]
+          },
+          {
             test: /\.csv$/,
             loader: 'file-loader',
             options: {
