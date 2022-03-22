@@ -52,8 +52,14 @@ th.s {
   width: 1%;
   white-space: nowrap;
 }
-td.nw {
+td.nw, a.nw {
   white-space: nowrap;
+}
+td.buy, span.buy {
+  color: #2aaf9f;
+}
+td.sell, span.sell {
+  color: #af742a;
 }
 header {
   display: flex;

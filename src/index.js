@@ -16,7 +16,7 @@ app.run((app) => {
       app.$('table.coin-table tbody').innerHTML = ctrl.coins.map(c => app.$t('coin', c)).join('');
     }
     transfers.redrawTableHead = (ctrl) => app.$('table.coin-table thead').innerHTML = app.$t('coin-header', ctrl);
-    transfers.setSort('time60');
+    transfers.setSort('buyTime60');
     return transfers;
   });
   app.controller('buyers', async (params) => {
@@ -26,7 +26,7 @@ app.run((app) => {
       app.$('table.buyer-table tbody').innerHTML = ctrl.buyers.filter((b,i) => i < 100).map(c => app.$t('buyer', c)).join('');
     }
     transfers.redrawTableHead = (ctrl) => app.$('table.buyer-table thead').innerHTML = app.$t('buyer-header', ctrl);
-    transfers.setSort('nocoins');
+    transfers.setSort('balance');
     return transfers;
   });
 }).start()

@@ -1,10 +1,18 @@
 <tr>
+  <td colspan="5"></td>
+  <td colspan="3" class="c buy">Buy</td>
+  <td colspan="3" class="c sell">Sell</td>
+</tr>
+<tr>
   <th onclick="app.context.controller.setSort('symbol')" class="s">Symbol{{sort==='symbol'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
   <th onclick="app.context.controller.setSort('name')">Name{{sort==='name'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
   <th onclick="app.context.controller.setSort('reserve0')" class="c">Reserve0{{sort==='reserve0'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
   <th onclick="app.context.controller.setSort('reserve1')" class="c">Reserve1{{sort==='reserve1'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
   <th onclick="app.context.controller.setSort('price')" class="c">Price{{sort==='price'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
-  <th onclick="app.context.controller.setSort('time60')" class="c s">60s{{sort==='time60'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
-  <th onclick="app.context.controller.setSort('time300')" class="c s">5min{{sort==='time300'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
-  <th onclick="app.context.controller.setSort('time600')" class="c s">10min{{sort==='time600'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('buyTime60')" class="c s">60s{{sort==='buyTime60'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('buyTime300')" class="c s">5min{{sort==='buyTime300'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('buyTime600')" class="c s">10min{{sort==='buyTime600'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('sellTime60')" class="c s">60s{{sort==='sellTime60'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('sellTime300')" class="c s">5min{{sort==='sellTime300'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
+  <th onclick="app.context.controller.setSort('sellTime600')" class="c s">10min{{sort==='sellTime600'?sortDir===1?' &#9660;':' &#9650;':''}}</th>
 </tr>

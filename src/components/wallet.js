@@ -16,7 +16,11 @@ module.exports = (app, forwarderOrigin, connect) => {
     ethereum.on('connect', (connectInfo) => {
       if(!app.state.connected) {
         app.state.connected = true;
-        connect();
+        try {
+          connect();
+        } catch (e) {
+          setTimeout(connect, 10);
+        }
       }
       console.log('connected');
       //app.refresh();

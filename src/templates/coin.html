@@ -4,7 +4,10 @@
   <td class="c">{{app.Num(this.bnbReserve || 0)}} BNB</td>
   <td class="c">{{app.Num(this.tokenReserve || 0)}} {{this.symbol}}</td>
   <td class="c">{{app.Num(this.price || 0)}} BNB</td>
-  <td class="c">{{this.time60 || 0}}</td>
-  <td class="c">{{this.time300 || 0}}</td>
-  <td class="c">{{this.time600 || 0}}</td>
+  <td class="c buy">{{this.buyTime60 || 0}}</td>
+  <td class="c buy">{{this.buyTime300 || 0}}</td>
+  <td class="c buy">{{this.buyTime600 || 0}}</td>
+  <td class="c sell">{{this.sellTime60 || 0}}</td>
+  <td class="c sell">{{this.sellTime300 || 0}}</td>
+  <td class="c sell">{{this.sellTime600 || 0}}</td>
 </tr>
