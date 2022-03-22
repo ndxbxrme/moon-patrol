@@ -16,18 +16,18 @@ module.exports = (app, forwarderOrigin, connect) => {
     ethereum.on('connect', (connectInfo) => {
       if(!app.state.connected) {
         app.state.connected = true;
-        try {
-          connect();
-        } catch (e) {
-          setTimeout(connect, 10);
-        }
+        connect();
       }
       console.log('connected');
       //app.refresh();
     });
     if(ethereum.chainId) {
       app.state.connected = true;
-      connect();
+      try {
+        connect();
+      } catch (e) {
+        setTimeout(connect, 10);
+      }
     }
     ctrl.provider = new ethers.providers.Web3Provider(ethereum);
     ctrl.signer = ctrl.provider.getSigner();
