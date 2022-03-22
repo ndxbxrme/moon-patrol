@@ -63,6 +63,12 @@ header img {
   flex: 1;
   width: 100%;
 }
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-right: 1em;
+}
 nav a {
   display: inline-block;
   padding: 1em;

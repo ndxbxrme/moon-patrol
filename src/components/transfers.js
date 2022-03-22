@@ -37,6 +37,7 @@ const chains = {
   },
 }
 module.exports = (app, forwarderOrigin) => {
+  const toProcess = [];
   const connect = () => ctrl.connect();
   const {provider, signer} = Wallet(app, forwarderOrigin, connect);
   const dexFactory = new ethers.Contract(dexFactoryAddress, dexFactoryAbi, provider);
@@ -46,6 +47,11 @@ module.exports = (app, forwarderOrigin) => {
   }
   const updateCoinData = async () => {
     const now = new Date().getTime();
+    const localToProcess = [...toProcess];
+    toProcess.length = 0;
+    for(let f=0; f<localToProcess.length; f++) {
+      await processTransfer(localToProcess[f]);
+    }
     for(let f=0; f<ctrl.coins.length; f++) {
       const coin = ctrl.coins[f];
       const times = [60,300,600];
@@ -59,17 +65,19 @@ module.exports = (app, forwarderOrigin) => {
       });
       if(coin.time60 || coin.resCooldown++ > 200) {
         coin.resCooldown = 0;
-        const pairContract = new ethers.Contract(coin.pairAddress, lpAbi, provider);
-        const reserves = await pairContract.getReserves();
-        if(ethers.BigNumber.from(coin.address).gt(ethers.BigNumber.from(coin.token0))) {
-          coin.bnbReserve = ethers.utils.formatEther(reserves[0]);
-          coin.tokenReserve = ethers.utils.formatUnits(reserves[1], coin.decimals);
+        if(coin.pairAddress) {
+          const pairContract = new ethers.Contract(coin.pairAddress, lpAbi, provider);
+          const reserves = await pairContract.getReserves();
+          if(ethers.BigNumber.from(coin.address).gt(ethers.BigNumber.from(coin.token0))) {
+            coin.bnbReserve = ethers.utils.formatEther(reserves[0]);
+            coin.tokenReserve = ethers.utils.formatUnits(reserves[1], coin.decimals);
+          }
+          else {
+            coin.bnbReserve = ethers.utils.formatEther(reserves[1]);
+            coin.tokenReserve = ethers.utils.formatUnits(reserves[0], coin.decimals);
+          }
+          coin.price = +coin.bnbReserve / +coin.tokenReserve;
         }
-        else {
-          coin.bnbReserve = ethers.utils.formatEther(reserves[1]);
-          coin.tokenReserve = ethers.utils.formatUnits(reserves[0], coin.decimals);
-        }
-        coin.price = +coin.bnbReserve / +coin.tokenReserve;
       }
     }
     for(let f=ctrl.coins.length-1; f>=0; f--) {
@@ -80,7 +88,8 @@ module.exports = (app, forwarderOrigin) => {
     doSort();
     ctrl.redrawTableBody && ctrl.redrawTableBody(ctrl);
   }
-  const handleEvent = async (log, event) => {
+  const processTransfer = async (log) => {
+    ctrl.transactionCount++;
     try {
       const transaction = await provider.getTransaction(log.transactionHash);
       const iface = new ethers.utils.Interface(dexRouterAbi);
@@ -122,6 +131,8 @@ module.exports = (app, forwarderOrigin) => {
         coin.pairAddress = await dexFactory.getPair(coin.token0, coin.address);
       }
       if(buyer) {
+        if(buyer.txns.includes(log.transactionHash)) return;
+        buyer.txns.push(log.transactionHash);
         buyer.volume++;
         buyer.value += value;
         let buyercoin = buyer.coins.find(c => c.address===res.path[1]);
@@ -148,7 +159,8 @@ module.exports = (app, forwarderOrigin) => {
           balance, coins: [ {
             address: res.path[1],
             name, symbol, decimals, value, pairAddress:coin.pairAddress, volume: 1
-          }]
+          }],
+          txns: [log.transactionHash]
         }
         ctrl.buyers.unshift(buyer);
       }
@@ -157,7 +169,16 @@ module.exports = (app, forwarderOrigin) => {
     }
     
   }
+  const handleBuy = (log) => {
+    log.buy = true;
+    toProcess.push(log);
+  }
+  const handleSell = (log) => {
+    log.sell = true;
+    toProcess.push(log);
+  }
   const ctrl = {
+    transactionCount: 0,
     redrawTableBody: null,
     redrawTableHead: null,
     coins: [],
@@ -173,13 +194,21 @@ module.exports = (app, forwarderOrigin) => {
       ctrl.redrawTableHead && ctrl.redrawTableHead(ctrl);
     },
     connect: async () => {
-      const filter = {
+      const buyFilter = {
         topics: [
           ethers.utils.id('Transfer(address,address,uint256)'),
           [ethers.utils.hexZeroPad(dexRouterAddress, 32), ethers.utils.hexZeroPad('0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8', 32)]
         ]
       }
-      provider.on(filter, handleEvent);
+      /*const sellFilter = {
+        topics: [
+          ethers.utils.id('Transfer(address,address,uint256)'),
+          null,
+          [ethers.utils.hexZeroPad(dexRouterAddress, 32), ethers.utils.hexZeroPad('0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8', 32)]
+        ]
+      }*/
+      provider.on(buyFilter, handleBuy);
+      //provider.on(sellFilter, handleSell);
       setInterval(updateCoinData, 1000);
     }
   }
